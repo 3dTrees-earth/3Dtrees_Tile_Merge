@@ -26,7 +26,7 @@ def main():
         if params.task == "tile":
             logger.info("Running tiling & subsampling only")
             result = subprocess.run(
-                ["bash", "tiling_main.sh", input_file, output_suffix],
+                ["bash", "tiling_main.sh", input_file],
                 check=True,
                 text=True,
                 env=env,
