@@ -68,14 +68,14 @@ def main():
             tile_folder = (
                 "/out/03_output_SAT/final_results"  # Where the tiles are located
             )
-            original_point_cloud = "/out/00_original/input.laz"  # Original input file
+            subsampled_file = "/out/01_subsampled/input_subsampled_10cm.laz"  # Subsampled input file
 
             os.makedirs("/out/04_merged", exist_ok=True)
             output_file = "/out/04_merged/merged_pc.laz"  # Output file
 
             merge_tiles(
                 tile_folder=tile_folder,
-                original_point_cloud=original_point_cloud,
+                original_point_cloud=subsampled_file,
                 output_file=output_file,
                 buffer=0,
                 min_cluster_size=300,

@@ -254,7 +254,7 @@ if __name__ == "__main__":
         description="Merge PredInstance and (PredSemantic) from tiles back into the original point cloud."
     )
     parser.add_argument("--tile_folder", help="Folder containing LAS/LAZ tiles.")
-    parser.add_argument("--original_point_cloud", help="Original point cloud file.")
+    parser.add_argument("--original_point_cloud", help="subsampled point cloud file.")
     parser.add_argument("--output_file", help="Output file for the merged point cloud.")
     parser.add_argument(
         "--buffer",
