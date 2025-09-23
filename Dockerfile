@@ -48,8 +48,6 @@ SHELL ["conda", "run", "-n", "tiling_env", "/bin/bash", "-c"]
 
 # Install additional Python packages
 RUN pip install \
-    numpy==1.23.5 \
-    open3d==0.18.0 \
     pydantic \
     pydantic-settings \
     tqdm
@@ -58,9 +56,6 @@ ENV EGL_PLATFORM=surfaceless
 
 RUN mkdir -p /src && mkdir -p /in && mkdir -p /out
 COPY ./src /src
-
-RUN apt-get update && apt-get install -y \
-    zip
 
 WORKDIR /src
 CMD ["python", "run.py"]
