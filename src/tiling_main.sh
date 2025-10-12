@@ -32,7 +32,7 @@ pdal translate "/out/00_original/input.laz" "${SUBSAMPLED_10cm_FILE}" --json='{
 echo "[Step 2] Tiling input file: $SUBSAMPLED_10cm_FILE ..." 
 
 # Check if the subsampled file is smaller than 3 GB
-if [ $(stat -c%s "$SUBSAMPLED_10cm_FILE") -lt 300 ]; then
+if [ $(stat -c%s "$SUBSAMPLED_10cm_FILE") -lt 3000000000 ]; then
     echo "Subsampled file is smaller than 3 GB. Copying it to 02_input_SAT folder..." 
     mkdir -p /out/02_input_SAT
     rsync -avP "$SUBSAMPLED_10cm_FILE" /out/02_input_SAT/tiled_1.laz
