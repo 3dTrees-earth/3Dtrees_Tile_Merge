@@ -1,3 +1,5 @@
+<h1>3Dtrees: Tile & Merge - Point cloud pre-processing for Model</h1>
+
 **What it does**
 
 This tool processes 3D point cloud data for tree segmentation by either:
