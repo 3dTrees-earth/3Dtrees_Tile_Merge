@@ -29,10 +29,11 @@ RUN wget -q https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.s
     rm miniconda.sh
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-# Accept conda ToS and install latest PDAL from conda-forge (has threading support)
-RUN conda config --set channel_priority strict && \
-    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
-    conda install -c conda-forge pdal -y && \
+# Accept conda ToS and install PDAL from main channel
+RUN conda tos accept && \
+    conda config --set channel_priority strict && \
+    conda config --add channels conda-forge && \
+    conda install pdal -y && \
     conda clean -afy
 
 # Install Python packages using uv
