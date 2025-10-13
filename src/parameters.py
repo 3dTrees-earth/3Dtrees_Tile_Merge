@@ -26,6 +26,16 @@ class Parameters(BaseSettings):
         description="Overlap",
         alias=AliasChoices("overlap", "overlap"),
     )
+    tiling_threshold: float = Field(
+        3,
+        description="Tiling threshold in GB",
+        alias=AliasChoices("tiling-threshold", "tiling_threshold"),
+    )
+    points_threshold: int = Field(
+        1000,
+        description="required min. points per tile - otherwise deleted",
+        alias=AliasChoices("points-threshold", "points_threshold"),
+    )
 
     task: str = Field(
         "tile",

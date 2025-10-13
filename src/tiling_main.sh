@@ -1,6 +1,4 @@
 #!/bin/bash
-# limit memory
-ulimit -v 188743680  # 200 GB in kilobytes (200 * 1024 * 1024)
 
 # Get the input file argument
 INPUT_FILE=$1
@@ -32,7 +30,7 @@ pdal translate "/out/00_original/input.laz" "${SUBSAMPLED_10cm_FILE}" --json='{
 echo "[Step 2] Tiling input file: $SUBSAMPLED_10cm_FILE ..." 
 
 # Check if the subsampled file is smaller than 3 GB
-if [ $(stat -c%s "$SUBSAMPLED_10cm_FILE") -lt 300 ]; then
+if [ $(stat -c%s "$SUBSAMPLED_10cm_FILE") -lt $TILING_THRESHOLD ]; then
     echo "Subsampled file is smaller than 3 GB. Copying it to 02_input_SAT folder..." 
     mkdir -p /out/02_input_SAT
     rsync -avP "$SUBSAMPLED_10cm_FILE" /out/02_input_SAT/tiled_1.laz
@@ -42,25 +40,33 @@ else
     pdal tile "$SUBSAMPLED_10cm_FILE" /out/02_input_SAT/tiled_#.laz --length $TILE_SIZE --buffer $OVERLAP
     
     # Check if tiles are too large and tile them again
-    echo "Checking if tiles are too large..."
+    echo "Checking if tiles are too large - greater than 66% of threshold..."
     index=1
     for f in /out/02_input_SAT/*.laz; do
-        if [ -f "$f" ] && [ $(stat -c%s "$f") -gt 2000000000 ]; then
+        if [ -f "$f" ] && [ $(stat -c%s "$f") -gt $TILE_AGAIN_THRESHOLD ]; then
             echo "Tile $f is too large. Tiling it again..." 
-            pdal tile "$f" /out/02_input_SAT/tiled_again_${index}_#.laz --length $((($TILE_SIZE*2) / 3)) --buffer $OVERLAP 
+            # Calculate new tile size and buffer (must satisfy: buffer < length/2)
+            NEW_TILE_SIZE=$((($TILE_SIZE*2) / 3))
+            NEW_BUFFER=$((($OVERLAP*2) / 3))
+            # Ensure buffer is less than half of tile size
+            if [ $NEW_BUFFER -ge $(($NEW_TILE_SIZE / 2)) ]; then
+                NEW_BUFFER=$(($NEW_TILE_SIZE / 2 - 1))
+            fi
+            echo "Re-tiling with size $NEW_TILE_SIZE and buffer $NEW_BUFFER"
+            pdal tile "$f" /out/02_input_SAT/tiled_again_${index}_#.laz --length $NEW_TILE_SIZE --buffer $NEW_BUFFER 
             rm -f "$f" 
             index=$((index + 1))
         fi
     done
 
-    # Remove tiles with less than 1000 points
-    echo "Removing tiles with less than 1000 points..." 
+    # Remove tiles with less than threshold points
+    echo "Removing tiles with less than $POINTS_THRESHOLD points..." 
     for tile in /out/02_input_SAT/*.laz; do
         if [ -f "$tile" ]; then
             point_count=$(pdal info --metadata "$tile" | grep '"count"' | sed 's/[^0-9]//g')
             echo "Tile $tile has $point_count points." 
-            if [ "$point_count" -lt 1000 ]; then
-                echo "Tile $tile has less than 1000 points. Deleting it..." 
+            if [ "$point_count" -lt $POINTS_THRESHOLD ]; then
+                echo "Tile $tile has less than $POINTS_THRESHOLD points. Deleting it..." 
                 rm -f "$tile"
             fi
         fi

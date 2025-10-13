@@ -20,6 +20,11 @@ def main():
     env = os.environ.copy()
     env["TILE_SIZE"] = str(params.tile_size)
     env["OVERLAP"] = str(params.overlap)
+    env["TILING_THRESHOLD"] = str(int(params.tiling_threshold * 1024 * 1024 * 1024))
+    env["TILE_AGAIN_THRESHOLD"] = str(
+        int(params.tiling_threshold * 1024 * 1024 * 1024 * (66 / 100))
+    )
+    env["POINTS_THRESHOLD"] = str(params.points_threshold)
 
     # Call tiling_main.sh with appropriate arguments
     try:
@@ -36,9 +41,15 @@ def main():
 
             # Create zip file for tiling results
             logger.info("Creating zip file with tiling results...")
-            with zipfile.ZipFile("prepared_files.zip", "w") as zipf:  # Changed from "/out/prepared_files.zip" to "prepared_files.zip"
+            with zipfile.ZipFile(
+                "prepared_files.zip", "w"
+            ) as zipf:  # Changed from "/out/prepared_files.zip" to "prepared_files.zip"
                 # Add all files from each directory recursively
-                directories_to_zip = ["/out/00_original", "/out/01_subsampled", "/out/02_input_SAT"]
+                directories_to_zip = [
+                    "/out/00_original",
+                    "/out/01_subsampled",
+                    "/out/02_input_SAT",
+                ]
 
                 for directory in directories_to_zip:
                     if os.path.exists(directory):
@@ -68,7 +79,9 @@ def main():
             tile_folder = (
                 "/out/03_output_SAT/final_results"  # Where the tiles are located
             )
-            subsampled_file = "/out/01_subsampled/input_subsampled_10cm.laz"  # Subsampled input file
+            subsampled_file = (
+                "/out/01_subsampled/input_subsampled_10cm.laz"  # Subsampled input file
+            )
 
             os.makedirs("/out/04_merged", exist_ok=True)
             output_file = "/out/04_merged/merged_pc.laz"  # Output file
