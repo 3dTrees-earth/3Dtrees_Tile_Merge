@@ -32,7 +32,6 @@ ENV PATH=$CONDA_DIR/bin:$PATH
 # Accept conda ToS and install latest PDAL from conda-forge (has threading support)
 RUN conda config --set channel_priority strict && \
     conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
-    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
     conda install -c conda-forge pdal -y && \
     conda clean -afy
 
