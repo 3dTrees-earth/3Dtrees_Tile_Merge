@@ -271,7 +271,9 @@ def merge_tiles(
         if dimension.name not in ["PredInstance", "PredSemantic"]:
             setattr(merged_las, dimension.name, getattr(original_las, dimension.name))
 
-    merged_las.write(output_file)
+    merged_las.write(
+        output_file, do_compress=True, laz_backend=laspy.LazBackend.LazrsParallel
+    )
     print(f"Merged point cloud saved to {output_file}")
 
 

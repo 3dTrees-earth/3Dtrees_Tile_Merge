@@ -20,12 +20,14 @@ def main(original_file, subsampled_file, output_file):
         subsampled_file (str): Path to the subsampled LAS/LAZ file with predicted attributes.
         output_file (str): Path to save the updated original LAS/LAZ file.
     """
-    # Load the original point cloud
-    original_las = laspy.read(original_file)
+    # Load the original point cloud with parallel LAZ reading
+    original_las = laspy.read(original_file, laz_backend=laspy.LazBackend.LazrsParallel)
     original_points = np.vstack((original_las.x, original_las.y, original_las.z)).T
 
-    # Load the subsampled point cloud
-    subsampled_las = laspy.read(subsampled_file)
+    # Load the subsampled point cloud with parallel LAZ reading
+    subsampled_las = laspy.read(
+        subsampled_file, laz_backend=laspy.LazBackend.LazrsParallel
+    )
     subsampled_points = np.vstack(
         (subsampled_las.x, subsampled_las.y, subsampled_las.z)
     ).T
@@ -49,12 +51,14 @@ def main(original_file, subsampled_file, output_file):
     #     original_las.add_extra_dim(laspy.ExtraBytesParams(name="species_id_x", type=np.int32))
 
     # Create a KD-tree for the subsampled point cloud
+    print("Building KD-tree for nearest neighbor search...")
     tree = KDTree(subsampled_points)
 
     # Find the nearest neighbors in the subsampled point cloud for each point in the original point cloud
-    distances, indices = tree.query(original_points)
+    distances, indices = tree.query(original_points, workers=-1)
 
     # Map attributes from the subsampled point cloud to the original point cloud
+    print("Mapping attributes to original point cloud...")
     original_las.PredInstance = subsampled_las.PredInstance[indices]
     # original_las.PredSemantic = subsampled_las.PredSemantic[indices]
     # original_las.species_id_x = subsampled_las.species_id_x[indices]
@@ -64,9 +68,12 @@ def main(original_file, subsampled_file, output_file):
     for dim in original_las.point_format.extra_dimensions:
         print(f"{dim.name}: {dim.dtype}")
 
-    # Save the updated original point cloud
+    # Save the updated original point cloud with LAZ compression (parallel)
+    print("Writing compressed LAZ file with parallel compression...")
     with open(output_file, "wb") as f:
-        original_las.write(f)
+        original_las.write(
+            f, do_compress=True, laz_backend=laspy.LazBackend.LazrsParallel
+        )
         f.flush()
         os.fsync(f.fileno())
     print(f"Updated point cloud saved to {output_file}")
