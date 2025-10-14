@@ -27,7 +27,7 @@ fi
 
 mkdir -p /out/01_subsampled
 mkdir -p /out/01_subsampled/chunks
-SUBSAMPLED_10cm_FILE=/out/01_subsampled/input_subsampled_10cm.laz
+SUBSAMPLED_FILE=/out/01_subsampled/input_subsampled.laz
 
 # Get the bounds of the input file
 echo "Getting spatial bounds of input file..."
@@ -139,7 +139,7 @@ if [ -z "$CHUNK_FILES" ]; then
     exit 1
 fi
 
-pdal merge $CHUNK_FILES "$SUBSAMPLED_10cm_FILE"
+pdal merge $CHUNK_FILES "$SUBSAMPLED_FILE"
 
 # Clean up chunk files
 echo "Cleaning up temporary chunk files..."
@@ -149,17 +149,17 @@ echo "Subsampling completed!"
 
 
 # Step 1: Tiling input file (if needed)
-echo "[Step 2] Tiling input file: $SUBSAMPLED_10cm_FILE ..." 
+echo "[Step 2] Tiling input file: $SUBSAMPLED_FILE ..." 
 
 # Check if the subsampled file is smaller than 3 GB
-if [ $(stat -c%s "$SUBSAMPLED_10cm_FILE") -lt $TILING_THRESHOLD ]; then
+if [ $(stat -c%s "$SUBSAMPLED_FILE") -lt $TILING_THRESHOLD ]; then
     echo "Subsampled file is smaller than 3 GB. Copying it to 02_input_SAT folder..." 
     mkdir -p /out/02_input_SAT
-    rsync -avP "$SUBSAMPLED_10cm_FILE" /out/02_input_SAT/tiled_1.laz
+    rsync -avP "$SUBSAMPLED_FILE" /out/02_input_SAT/tiled_1.laz
 else
     echo "File is large, tiling with size $TILE_SIZE and overlap $OVERLAP"
     mkdir -p /out/02_input_SAT
-    pdal tile "$SUBSAMPLED_10cm_FILE" /out/02_input_SAT/tiled_#.laz --length $TILE_SIZE --buffer $OVERLAP
+    pdal tile "$SUBSAMPLED_FILE" /out/02_input_SAT/tiled_#.laz --length $TILE_SIZE --buffer $OVERLAP
     
     # Check if tiles are too large and tile them again
     echo "Checking if tiles are too large - greater than 66% of threshold..."
