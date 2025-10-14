@@ -93,7 +93,7 @@ def main():
                 "/out/03_output_SAT/final_results"  # Where the tiles are located
             )
             subsampled_file = (
-                "/out/01_subsampled/input_subsampled_10cm.laz"  # Subsampled input file
+                "/out/01_subsampled/input_subsampled.laz"  # Subsampled input file
             )
 
             os.makedirs("/out/04_merged", exist_ok=True)
